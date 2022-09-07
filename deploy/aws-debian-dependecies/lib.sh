@@ -15,7 +15,11 @@ installSsmAgent() {
     fi
     
     cd /tmp
-    wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
+    if uname -m | grep -q aarch; then
+        wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_arm64/amazon-ssm-agent.deb
+    else
+        wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
+    fi    
     sudo dpkg -i amazon-ssm-agent.deb
     sudo systemctl enable amazon-ssm-agent
     sudo systemctl start amazon-ssm-agent
@@ -33,7 +37,11 @@ installCloudWatchAgent() {
     
     mkdir /tmp/cwa
     cd /tmp/cwa
-    wget https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+    if uname -m | grep -q aarch; then
+        wget https://s3.amazonaws.com/amazoncloudwatch-agent/linux/arm64/latest/AmazonCloudWatchAgent.zip
+    else
+        wget https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+    fi  
     unzip AmazonCloudWatchAgent.zip
     sudo ./install.sh
     sudo mkdir /usr/share/collectd
