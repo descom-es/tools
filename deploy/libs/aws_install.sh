@@ -65,17 +65,24 @@ installPhp() {
     
     for EXT in $PHP_EXT
     do
-        runCommand apt -y install php${PHP_VERSION}-${EXT}
+        if [ $EXT == 'swoole' ]; then
+            installSwoole $PHP_VERSION
+        else
+            runCommand apt -y install php${PHP_VERSION}-${EXT}
+        fi
     done
     
     runCommand systemctl enable php${PHP_VERSION}-fpm.service
     
     # Configure php
     yes | runCommand cp -pr $PATH_APP/etc/php/* /etc/php/${PHP_VERSION}/fpm/pool.d/
-    
-    # Swoole
-    runCommand add-apt-repository ppa:openswoole/ppa -y
+}
 
+# Install swoole
+installSwoole(){
+    PHP_VERSION=$1
+
+    runCommand add-apt-repository ppa:openswoole/ppa -y
     runCommand apt install -y php${PHP_VERSION}-openswoole
 }
  
@@ -104,7 +111,7 @@ installNginx() {
 
 # Install Database
 installDatabase() {
-    DATABASE=$1
+    DATABASE=mariadb
     
     sudo apt -y update
     sudo apt -y install ${DATABASE}-server ${DATABASE}-client
@@ -156,3 +163,5 @@ generateSwapFile() {
     runCommand swapon /swapfile1
     echo "/swapfile1   none    swap    sw    0   0" | runCommand tee -a /etc/fstab
 }
+
+sudo apt update -y
