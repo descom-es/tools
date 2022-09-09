@@ -7,6 +7,9 @@ systemctl-exists() {
 setLocalTime(){
     diff /etc/localtime /usr/share/zoneinfo/${1} || sudo ln -sf /usr/share/zoneinfo/${1} /etc/localtime
 }
+runCommand() {
+    sudo $1 "${@:2}"
+}
 
 # SSM Agent
 installSsmAgent() {
@@ -51,34 +54,31 @@ installCloudWatchAgent() {
 # Install php
 installPhp() {
     PHP_VERSION=$1
-    PHP_EXT=$2
-    
-    if [ ! -z $PHP_VERSION ]; then
-        return
-    fi    
+    PHP_EXT=$(echo $2 | tr "," "\n")
 
-    sudo apt install lsb-release ca-certificates apt-transport-https software-properties-common -y
-    sudo add-apt-repository ppa:ondrej/php
+    runCommand apt install lsb-release ca-certificates apt-transport-https software-properties-common -y
+
+    runCommand add-apt-repository ppa:ondrej/php -y
     
-    sudo apt -y update
-    sudo apt -y install php${PHP_VERSION}
+    runCommand apt -y update
+    runCommand apt -y install php${PHP_VERSION}
     
-    if [ -z $PHP_EXT ]; then
-        sudo apt -y install php${PHP_VERSION}-${PHP_EXT}
-    fi
+    for EXT in $PHP_EXT
+    do
+        runCommand apt -y install php${PHP_VERSION}-${EXT}
+    done
     
-    sudo systemctl enable php${PHP_VERSION}-fpm.service
+    runCommand systemctl enable php${PHP_VERSION}-fpm.service
     
     # Configure php
-    yes | cp -pr $PATH_APP/etc/php/* /etc/php/${PHP_VERSION}/fpm/pool.d/
+    yes | runCommand cp -pr $PATH_APP/etc/php/* /etc/php/${PHP_VERSION}/fpm/pool.d/
     
     # Swoole
-    apt install -y software-properties-common && add-apt-repository ppa:ondrej/php -y
-    apt install -y software-properties-common && add-apt-repository ppa:openswoole/ppa -y
-    
-    apt install -y php${PHP_VERSION}-openswoole
-}
+    runCommand add-apt-repository ppa:openswoole/ppa -y
 
+    runCommand apt install -y php${PHP_VERSION}-openswoole
+}
+ 
 # Install Composer
 installComposer() {
     if [ -f /usr/local/bin/composer ]; then
@@ -86,8 +86,8 @@ installComposer() {
     fi
     
     cd /tmp
-    curl -sS https://getcomposer.org/installer | sudo php
-    sudo mv composer.phar /usr/local/bin/composer
+    curl -sS https://getcomposer.org/installer | runCommand php
+    runCommand mv composer.phar /usr/local/bin/composer
     cd ~/
 }
 
@@ -125,9 +125,6 @@ installCertbot() {
     fi
     
     sudo apt -y update
-    sudo apt -y install software-properties-common
-    sudo add-apt-repository -y ppa:certbot/certbot
-    sudo apt -y update
     sudo apt -y install certbot
 }
 
@@ -150,10 +147,12 @@ generateSwapFile() {
     if [ -z $1 ]; then
         return
     fi
+
+    SWAP_SIZE=$1
     
-    sudo dd if=/dev/zero of=/swapfile1 bs=1024 count=${SWAP_SIZE}
-    sudo chmod 600 /swapfile1
-    sudo mkswap /swapfile1
-    sudo swapon /swapfile1
-    echo "/swapfile1   none    swap    sw    0   0" | sudo tee -a /etc/fstab
+    runCommand dd if=/dev/zero of=/swapfile1 bs=1024 count=${SWAP_SIZE}
+    runCommand chmod 600 /swapfile1
+    runCommand mkswap /swapfile1
+    runCommand swapon /swapfile1
+    echo "/swapfile1   none    swap    sw    0   0" | runCommand tee -a /etc/fstab
 }

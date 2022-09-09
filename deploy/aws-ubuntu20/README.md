@@ -5,9 +5,19 @@ Documentation for deploy on Ubuntu 20.04 on amazon EC2
 ## User Data
 ```
 #!/bin/bash
+
+# Tools
 systemctl-exists() {
     [ $(systemctl list-unit-files "${1}*" | wc -l) -gt 3 ]
 }
+setLocalTime(){
+    diff /etc/localtime /usr/share/zoneinfo/${1} || sudo ln -sf /usr/share/zoneinfo/${1} /etc/localtime
+}
+runCommand() {
+    sudo $1 "${@:2}"
+}
+
+# SSM Agent
 installSsmAgent() {
     if systemctl-exists amazon-ssm-agent.service; then
         return
@@ -25,21 +35,44 @@ installSsmAgent() {
     cd ~/
 }
 
+# CloudWatch Agent
+installCloudWatchAgent() {
+    if systemctl-exists amazon-cloudwatch-agent.service; then
+        return
+    fi
+    
+    sudo apt -y update
+    sudo apt -y install unzip
+    
+    mkdir /tmp/cwa
+    cd /tmp/cwa
+    if uname -m | grep -q aarch; then
+        wget https://s3.amazonaws.com/amazoncloudwatch-agent/linux/arm64/latest/AmazonCloudWatchAgent.zip
+    else
+        wget https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+    fi  
+    unzip AmazonCloudWatchAgent.zip
+    sudo ./install.sh
+    sudo mkdir /usr/share/collectd
+    sudo touch /usr/share/collectd/types.db
+}
+
+# CodeDeploy Agent
+installCodeDeployAgent() {
+    sudo apt update
+    sudo apt install ruby-full
+    sudo apt install wget
+
+    cd /home/ubuntu
+    wget https://aws-codedeploy-eu-west-1.s3.eu-west-1.amazonaws.com/latest/install
+
+    chmod +x ./install
+    sudo ./install auto > /tmp/logfile
+}
+
 installSsmAgent
-```
-
-## Install CodeDeploy Agent
-```
-#!/bin/bash
-sudo apt update
-sudo apt install ruby-full
-sudo apt install wget
-
-cd /home/ubuntu
-wget https://aws-codedeploy-eu-west-1.s3.eu-west-1.amazonaws.com/latest/install
-
-chmod +x ./install
-sudo ./install auto > /tmp/logfile
+installCloudWatchAgent
+installCodeDeployAgent
 ```
 
 ## Example library usage
@@ -59,6 +92,6 @@ installNginx
 installDatabase "mariadb"
 installGit
 installCertbot
-generateSwapFile 1048576 # 1GB
+generateSwapFile 1048576 # 1GB
 
 ```
