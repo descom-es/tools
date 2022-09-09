@@ -10,7 +10,7 @@ setLocalTime "Europe/Madrid"
 generateSwapFile 1048576 # 1GB
 installSsmAgent
 # installCloudWatchAgent
-# install
+# installCodeDeployAgent
 # installPhp 8.1 "fpm,mbstring,dom,gd,soap,swoole"
 # installComposer
 # installNginx
