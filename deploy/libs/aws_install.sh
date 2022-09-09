@@ -51,6 +51,17 @@ installCloudWatchAgent() {
     sudo touch /usr/share/collectd/types.db
 }
 
+# CodeDeploy Agent
+installCodeDeployAgent() {
+    sudo apt install ruby-full -y
+    sudo apt install wget -y
+
+    cd /home/ubuntu
+    wget https://aws-codedeploy-eu-west-1.s3.eu-west-1.amazonaws.com/latest/install
+    sudo chmod +x ./install
+    sudo ./install auto > /tmp/logfile
+}
+
 # Install php
 installPhp() {
     PHP_VERSION=$1
