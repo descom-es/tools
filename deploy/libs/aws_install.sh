@@ -175,4 +175,10 @@ generateSwapFile() {
     echo "/swapfile1   none    swap    sw    0   0" | runCommand tee -a /etc/fstab
 }
 
+# Aws client
+installAwsClient() {
+    sudo apt -y update
+    sudo apt install awscli -y
+}
+
 sudo apt update -y
