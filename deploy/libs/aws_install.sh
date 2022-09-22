@@ -118,6 +118,8 @@ installNginx() {
     
     # Configure nginx
     yes | cp -pr $PATH_APP/etc/nginx/* /etc/nginx/
+
+    sudo ln -s /etc/nginx/sites-available/* /etc/nginx/sites-enabled/
 }
 
 # Install Database
