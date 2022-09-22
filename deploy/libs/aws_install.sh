@@ -182,4 +182,9 @@ installAwsClient() {
     sudo ./aws/install
 }
 
+# Supervisor
+installSupervisor() {
+    sudo apt install -y supervisor
+}
+
 sudo apt update -y
