@@ -189,4 +189,19 @@ installSupervisor() {
     sudo apt install -y supervisor
 }
 
+installNode() {
+    NODE_VERSION=$1
+    
+    if [ -z "$NODE_VERSION" ]; then
+        NODE_VERSION="14"
+    fi
+    
+    if [ -z "$(nvm)" ]; then
+        wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+    fi
+    
+    nvm install $NODE_VERSION
+    nvm use $NODE_VERSION
+}
+
 sudo apt update -y
