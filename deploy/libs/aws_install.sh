@@ -187,6 +187,8 @@ installAwsClient() {
 # Supervisor
 installSupervisor() {
     sudo apt install -y supervisor
+
+    yes | cp -pr $PATH_APP/etc/supervisor/* /etc/supervisor/
 }
 
 installNode() {
