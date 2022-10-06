@@ -16,13 +16,13 @@ installSsmAgent() {
     if systemctl-exists amazon-ssm-agent.service; then
         return
     fi
-    
+
     cd /tmp
     if uname -m | grep -q aarch; then
         wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_arm64/amazon-ssm-agent.deb
     else
         wget https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
-    fi    
+    fi
     sudo dpkg -i amazon-ssm-agent.deb
     sudo systemctl enable amazon-ssm-agent
     sudo systemctl start amazon-ssm-agent
@@ -34,17 +34,17 @@ installCloudWatchAgent() {
     if systemctl-exists amazon-cloudwatch-agent.service; then
         return
     fi
-    
+
     sudo apt -y update
     sudo apt -y install unzip
-    
+
     mkdir /tmp/cwa
     cd /tmp/cwa
     if uname -m | grep -q aarch; then
         wget https://s3.amazonaws.com/amazoncloudwatch-agent/linux/arm64/latest/AmazonCloudWatchAgent.zip
     else
         wget https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
-    fi  
+    fi
     unzip AmazonCloudWatchAgent.zip
     sudo ./install.sh
     sudo mkdir /usr/share/collectd
@@ -70,10 +70,10 @@ installPhp() {
     runCommand apt install lsb-release ca-certificates apt-transport-https software-properties-common -y
 
     runCommand add-apt-repository ppa:ondrej/php -y
-    
+
     runCommand apt -y update
     runCommand apt -y install php${PHP_VERSION}
-    
+
     for EXT in $PHP_EXT
     do
         if [ $EXT == 'swoole' ]; then
@@ -82,9 +82,9 @@ installPhp() {
             runCommand apt -y install php${PHP_VERSION}-${EXT}
         fi
     done
-    
+
     runCommand systemctl enable php${PHP_VERSION}-fpm.service
-    
+
     # Configure php
     yes | runCommand cp -pr $PATH_APP/etc/php/* /etc/php/${PHP_VERSION}/fpm/pool.d/
 }
@@ -96,13 +96,13 @@ installSwoole(){
     runCommand add-apt-repository ppa:openswoole/ppa -y
     runCommand apt install -y php${PHP_VERSION}-openswoole
 }
- 
+
 # Install Composer
 installComposer() {
     if [ -f /usr/local/bin/composer ]; then
         return
     fi
-    
+
     cd /tmp
     curl -sS https://getcomposer.org/installer | runCommand php
     runCommand mv composer.phar /usr/local/bin/composer
@@ -113,9 +113,9 @@ installComposer() {
 installNginx() {
     sudo apt -y update
     sudo apt -y install nginx
-    
+
     sudo systemctl enable nginx.service
-    
+
     # Configure nginx
     yes | cp -pr $PATH_APP/etc/nginx/* /etc/nginx/
 
@@ -125,10 +125,10 @@ installNginx() {
 # Install Database
 installDatabase() {
     DATABASE=mariadb
-    
+
     sudo apt -y update
     sudo apt -y install ${DATABASE}-server ${DATABASE}-client
-    
+
     sudo systemctl enable ${DATABASE}.service
 }
 
@@ -143,7 +143,7 @@ installCertbot() {
     if [ -f /usr/bin/certbot ]; then
         return
     fi
-    
+
     sudo apt -y update
     sudo apt -y install certbot
 }
@@ -153,7 +153,7 @@ installJq() {
     if [ -f /usr/bin/jq ]; then
         return
     fi
-    
+
     sudo apt -y update
     sudo apt -y install jq
 }
@@ -163,13 +163,13 @@ generateSwapFile() {
     if [ -f /swapfile1 ]; then
         return
     fi
-    
+
     if [ -z $1 ]; then
         return
     fi
 
     SWAP_SIZE=$1
-    
+
     runCommand dd if=/dev/zero of=/swapfile1 bs=1024 count=${SWAP_SIZE}
     runCommand chmod 600 /swapfile1
     runCommand mkswap /swapfile1
@@ -188,20 +188,20 @@ installAwsClient() {
 installSupervisor() {
     sudo apt install -y supervisor
 
-    yes | cp -pr $PATH_APP/etc/supervisor/* /etc/supervisor/
+    yes | cp -pr $PATH_APP/etc/supervisor/* /etc/supervisor/conf.d/
 }
 
 installNode() {
     NODE_VERSION=$1
-    
+
     if [ -z "$NODE_VERSION" ]; then
         NODE_VERSION="14"
     fi
-    
+
     if [ -z "$(nvm)" ]; then
         wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
     fi
-    
+
     nvm install $NODE_VERSION
     nvm use $NODE_VERSION
 
