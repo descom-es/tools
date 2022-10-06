@@ -26,7 +26,7 @@ installSsmAgent() {
     sudo dpkg -i amazon-ssm-agent.deb
     sudo systemctl enable amazon-ssm-agent
     sudo systemctl start amazon-ssm-agent
-    cd ~/
+    cd $PATH_APP
 }
 
 # CloudWatch Agent
@@ -49,10 +49,16 @@ installCloudWatchAgent() {
     sudo ./install.sh
     sudo mkdir /usr/share/collectd
     sudo touch /usr/share/collectd/types.db
+
+    cd $PATH_APP
 }
 
 # CodeDeploy Agent
 installCodeDeployAgent() {
+    if [ -f /opt/codedeploy-agent/bin/codedeploy-agent ]; then
+        return
+    fi
+
     sudo apt install ruby-full -y
     sudo apt install wget -y
 
@@ -60,10 +66,16 @@ installCodeDeployAgent() {
     wget https://aws-codedeploy-eu-west-1.s3.eu-west-1.amazonaws.com/latest/install
     sudo chmod +x ./install
     sudo ./install auto > /tmp/logfile
+
+    cd $PATH_APP
 }
 
 # Install php
 installPhp() {
+    if [ -f /usr/bin/php ]; then
+        return
+    fi
+
     PHP_VERSION=$1
     PHP_EXT=$(echo $2 | tr "," "\n")
 
@@ -93,6 +105,12 @@ installPhp() {
 installSwoole(){
     PHP_VERSION=$1
 
+    dpkg-query -l php8.1-openswoole > /dev/null
+
+    if [ $? -eq 0 ]; then
+        return
+    fi
+
     runCommand add-apt-repository ppa:openswoole/ppa -y
     runCommand apt install -y php${PHP_VERSION}-openswoole
 }
@@ -106,12 +124,11 @@ installComposer() {
     cd /tmp
     curl -sS https://getcomposer.org/installer | runCommand php
     runCommand mv composer.phar /usr/local/bin/composer
-    cd ~/
+    cd $PATH_APP
 }
 
 # Install NGINX
 installNginx() {
-    sudo apt -y update
     sudo apt -y install nginx
 
     sudo systemctl enable nginx.service
@@ -134,7 +151,6 @@ installDatabase() {
 
 # Install Git
 installGit() {
-    sudo apt -y update
     sudo apt -y install git
 }
 
@@ -144,7 +160,6 @@ installCertbot() {
         return
     fi
 
-    sudo apt -y update
     sudo apt -y install certbot
 }
 
@@ -154,7 +169,6 @@ installJq() {
         return
     fi
 
-    sudo apt -y update
     sudo apt -y install jq
 }
 
@@ -179,6 +193,10 @@ generateSwapFile() {
 
 # Aws client
 installAwsClient() {
+    if [ -f /usr/local/bin/aws ]; then
+        return
+    fi
+
     curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
     unzip awscliv2.zip
     sudo ./aws/install
