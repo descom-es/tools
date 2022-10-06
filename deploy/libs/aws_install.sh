@@ -160,7 +160,7 @@ installCertbot() {
         return
     fi
 
-    sudo apt -y install certbot
+    sudo apt -y install certbot python3-certbot-nginx
 }
 
 # Install JQ
@@ -207,6 +207,8 @@ installSupervisor() {
     sudo apt install -y supervisor
 
     yes | cp -pr $PATH_APP/etc/supervisor/* /etc/supervisor/conf.d/
+
+    supervisorctl update
 }
 
 installNode() {
