@@ -13,7 +13,7 @@ runCommand() {
 
 # SSM Agent
 installSsmAgent() {
-    if systemctl-exists amazon-ssm-agent.service; then
+    if systemctl-exists *amazon-ssm-agent.service; then
         return
     fi
 
