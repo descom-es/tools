@@ -31,7 +31,7 @@ mysqlCreateUser() {
     fi
 
     mysql -u root -e "CREATE USER IF NOT EXISTS '${USER}'@'localhost' IDENTIFIED BY '${PASSWORD}';"
-    mysql -u root -e "GRANT ALL PRIVILEGES ON *.${DATABASE} TO '${USER}'@'localhost';"
+    mysql -u root -e "GRANT ALL PRIVILEGES ON ${DATABASE}.* TO '${USER}'@'localhost';"
     mysql -u root -e "FLUSH PRIVILEGES;"
 
     return 1
