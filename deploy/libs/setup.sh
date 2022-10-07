@@ -24,7 +24,7 @@ mysqlCreateUser() {
     USER=$1
     PASSWORD=$2
 
-    if [ -z "$2" ]; then
+    if [ -z "$3" ]; then
         DATABASE="*"
     else
         DATABASE=$3
