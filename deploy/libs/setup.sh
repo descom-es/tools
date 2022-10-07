@@ -17,7 +17,7 @@ mysqlCreateDatabase() {
 }
 
 mysqlCreateUser() {
-    if [ -z "$1" -o -z "$2" ]; then
+    if [ -z "$2" ]; then
         return false
     fi
 
