@@ -218,8 +218,12 @@ installNode() {
         NODE_VERSION="14"
     fi
 
-    if [ -z "$(nvm)" ]; then
+    command -v nvm > /dev/null
+
+    if [ $? -ne 0 ]; then
         wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+        export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     fi
 
     nvm install $NODE_VERSION
