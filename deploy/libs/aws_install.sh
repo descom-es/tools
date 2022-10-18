@@ -231,5 +231,3 @@ installNode() {
 
     npm install --global yarn
 }
-
-sudo apt update -y
