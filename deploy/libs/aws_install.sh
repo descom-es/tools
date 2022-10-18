@@ -224,10 +224,15 @@ installNode() {
         wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
         export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        
+        echo "export NVM_DIR=\"$HOME/.nvm\"" >> "${PATH_ROOT}/.bashrc"
+        echo "[ -s \"$NVM_DIR/nvm.sh\" ] && \. \"$NVM_DIR/nvm.sh\"  # This loads nvm" >> "${PATH_ROOT}/.bashrc"
+        echo "[ -s \"$NVM_DIR/bash_completion\" ] && \. \"$NVM_DIR/bash_completion\"  # This loads nvm bash_completion" >> "${PATH_ROOT}/.bashrc"
+        source "${PATH_ROOT}/.bashrc"
+        
+        nvm install $NODE_VERSION
+        nvm use $NODE_VERSION
+
+        npm install --global yarn
     fi
-
-    nvm install $NODE_VERSION
-    nvm use $NODE_VERSION
-
-    npm install --global yarn
 }
